@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\ShopController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,9 +15,12 @@ use App\Http\Controllers\UserController;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
 
-// ユーザー登録
-Route::apiResource('/users', UserController::class)->only(['store']);
+// index：飲食店一覧取得
+// store: 飲食店情報登録
+// show: 飲食店詳細取得
+// update: 飲食店情報更新
+Route::apiResource('/shops', ShopController::class);

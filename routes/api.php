@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\LikeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,3 +25,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // show: 飲食店詳細取得
 // update: 飲食店情報更新
 Route::apiResource('/shops', ShopController::class);
+// store: お気に入り登録
+// delete: お気に入り削除
+Route::apiResource('/likes', LikeController::class)->only([
+  'store', 'destroy'
+]);

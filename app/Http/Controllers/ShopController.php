@@ -10,7 +10,6 @@ use App\Http\Requests\ShopUpdateRequest;
 use App\Models\Shop;
 use App\Models\Area;
 use App\Models\Genre;
-use App\Models\Like;
 use App\Models\Course;
 
 class ShopController extends Controller

@@ -132,13 +132,41 @@ class ShopController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * serach shops
      *
-     * @param  \App\Models\Shop  $shop
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Shop $shop)
+    public function search(Request $request)
     {
-        //
+        $area = $request->area;
+        $genre = $request->genre;
+        $shop_name = $request->shop_name;
+        $items = null;
+        $user_id = Auth::id();
+        if($user_id) {
+            $items = Shop::with(['area', 'genre', 'likes' => function($like_query) use($user_id) {
+                $like_query->where('user_id', $user_id);
+            }])
+            ->whereArea($area)
+            ->whereGenre($genre)
+            ->whereShopName($shop_name)
+            ->get();
+        } else {
+            $items = Shop::with(['area', 'genre'])
+            ->whereArea($area)
+            ->whereGenre($genre)
+            ->whereShopName($shop_name)
+            ->get();
+        }
+        $areas = Area::all();
+        $genres = Genre::all();
+        $inputs = $request->except(['_token']);
+        return response()->json([
+            'items' => $items,
+            'areas' => $areas,
+            'genres' => $genres,
+            'inputs' => $inputs
+        ], 200);
     }
 }

@@ -2,31 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Payment;
 use Illuminate\Http\Request;
+use Laravel\Cashier\Payment;
+use Stripe\Stripe;
+use Stripe\Customer;
+use Stripe\Charge;
+use App\Models\Payment as PaymentModel;
 
 class PaymentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -35,51 +19,23 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Payment $payment)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Payment $payment)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Payment $payment)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Payment $payment)
-    {
-        //
+        Stripe::setApiKey(config('services.stripe.st_key'));
+        $customer = Customer::create([
+            'email' => $request->stripeEmail,
+            'source' => $request->stripeToken
+        ]);
+        $charge = Charge::create([
+            'customer' => $customer->id,
+            'amount' => $request->amount,
+            'currency' => "jpy"
+        ]);
+        $payment = PaymentModel::create([
+            'payment_flg' => true, 'reservation_id' => 0]
+        );
+        return response()->json([
+            'items' => $request->only(['date', 'time', 'number', 'course_id']),
+            'payment_id' => $payment->id,
+            'payment_flg' => $payment->payment_flg
+        ], 201);
     }
 }

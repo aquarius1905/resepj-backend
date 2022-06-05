@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class ShopLoginController extends Controller
+class UserAuthController extends Controller
 {
     //
 }

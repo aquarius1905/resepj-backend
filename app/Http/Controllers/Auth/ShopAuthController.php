@@ -15,8 +15,9 @@ use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\LogoutResponse;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Requests\LoginRequest;
+use Log;
 
-class ShopLoginController extends Controller
+class ShopAuthController extends Controller
 {
     /**
      * The guard implementation.

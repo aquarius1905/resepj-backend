@@ -30,14 +30,11 @@ class ShopRepresentativeController extends Controller
     {
         //店舗代表者登録
         $inputs = $request->except(['_token']);
-        Log::Debug($inputs);
         $inputs['password'] = Hash::make($inputs['password']);
         $shop_represetative = ShopRepresentative::create($inputs);
-        $token = $shop_represetative->createToken('auth_token')->plainTextToken;
-        // event(new RepresetativeRegistered($shop_represetative));
+        event(new RepresetativeRegistered($shop_represetative));
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer'
+            'message' => 'Store Successfully!'
         ], 201);
     }
 

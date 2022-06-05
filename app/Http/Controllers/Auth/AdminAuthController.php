@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Actions\Admin\AttemptToAuthenticate;
 use App\Http\Controllers\Controller;
-use App\Responses\AdminLoginResponse;
-use App\Responses\AdminLogoutResponse;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Routing\Pipeline;
@@ -45,6 +43,7 @@ class AdminAuthController extends Controller
     public function store(LoginRequest $request)
     {
         return $this->loginPipeline($request)->then(function ($request) {
+            Login::Debug($request);
             return app(AdminLoginResponse::class);
         });
     }
@@ -67,9 +66,9 @@ class AdminAuthController extends Controller
      * Destroy an authenticated session.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Laravel\Fortify\Contracts\AdminLogoutResponse
+     * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request): AdminLogoutResponse
+    public function destroy(Request $request)
     {
         $this->guard->logout();
 
@@ -77,6 +76,8 @@ class AdminAuthController extends Controller
 
         $request->session()->regenerateToken();
 
-        return app(AdminLogoutResponse::class);
+        return response()->json([
+            'message' => 'Logout Successfully!'
+        ], 201);
     }
 }

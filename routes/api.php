@@ -8,6 +8,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ShopRepresentativeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\ShopAuthController;
 use App\Http\Controllers\Auth\UserAuthController;
@@ -26,6 +27,15 @@ use App\Http\Controllers\Auth\UserAuthController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+//ユーザー登録
+Route::post('/users', [UserController::class, 'store']);
+//ユーザー情報取得
+Route::get('/users/me', [UserController::class, 'show']);
+//ユーザーログイン
+Route::post('/users/login', [UserAuthController::class, 'store']);
+//ユーザーログアウト
+Route::post('/users/loguout', [UserAuthController::class, 'destroy']);
 
 // index：飲食店一覧取得
 // store: 飲食店情報登録
@@ -58,8 +68,6 @@ Route::apiResource('/reservations/{reservation}/ratings', RatingController::clas
 Route::apiResource('/shop-represetatives', ShopRepresentativeController::class)->only([
   'store'
 ]);
-// 店舗代表者ログアウト
-Route::post('/shops/logout', [ShopRepresentativeController::class, 'logout']);
 // カード決済
 Route::apiResource('/payments', PaymentController::class)->only([
   'store'
@@ -69,7 +77,7 @@ Route::prefix('shops')->group(function () {
   Route::post('/login', [ShopAuthController::class, 'store'])->name('shop.login');
   Route::middleware('auth:admin')->group(function () {
     // 店舗代表者ログアウト
-    Route::post('/logout', [ShopAuthController::class, 'destroy'])->name('admin.logout');
+    Route::post('/logout', [ShopAuthController::class, 'destroy'])->name('shop.logout');
   });
 });
 Route::prefix('admins')->group(function () {

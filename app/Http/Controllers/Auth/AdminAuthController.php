@@ -7,12 +7,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Routing\Pipeline;
-use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
-use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
-use Laravel\Fortify\Contracts\LogoutResponse;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Requests\LoginRequest;
+use App\Models\Administrator;
+use Log;
 
 class AdminAuthController extends Controller
 {
@@ -43,8 +42,12 @@ class AdminAuthController extends Controller
     public function store(LoginRequest $request)
     {
         return $this->loginPipeline($request)->then(function ($request) {
-            Login::Debug($request);
-            return app(AdminLoginResponse::class);
+            $admin = Administrator::where('email', $request->email)->firstOrFail();
+            $token = $admin->createToken('auth_admin_token')->plainTextToken;
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ], 200);
         });
     }
 
@@ -71,13 +74,10 @@ class AdminAuthController extends Controller
     public function destroy(Request $request)
     {
         $this->guard->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
         return response()->json([
-            'message' => 'Logout Successfully!'
-        ], 201);
+            'message' => 'Logged out successfully'
+        ], 200);
     }
 }

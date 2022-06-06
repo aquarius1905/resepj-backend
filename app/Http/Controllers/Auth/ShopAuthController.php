@@ -4,17 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Actions\Shop\AttemptToAuthenticate;
 use App\Http\Controllers\Controller;
-use App\Responses\ShopLoginResponse;
-use App\Responses\ShopLogoutResponse;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Routing\Pipeline;
-use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\LogoutResponse;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Requests\LoginRequest;
+use App\Models\ShopRepresentative;
 use Log;
 
 class ShopAuthController extends Controller
@@ -46,7 +44,12 @@ class ShopAuthController extends Controller
     public function store(LoginRequest $request)
     {
         return $this->loginPipeline($request)->then(function ($request) {
-            return app(ShopLoginResponse::class);
+            $user = ShopRepresentative::where('email', $request->email)->firstOrFail();
+            $token = $user->createToken('auth_user_token')->plainTextToken;
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ], 200);
         });
     }
 
@@ -70,14 +73,13 @@ class ShopAuthController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return App\Responses\ShopLogoutResponse
      */
-    public function destroy(Request $request): ShopLogoutResponse
+    public function destroy(Request $request)
     {
         $this->guard->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
-        return app(ShopLogoutResponse::class);
+        return response()->json([
+            'message' => "Logged out successfully"
+        ], 200);
     }
 }

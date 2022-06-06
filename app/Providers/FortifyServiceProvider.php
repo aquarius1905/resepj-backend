@@ -8,10 +8,12 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Fortify;
 use App\Models\Administrator;
 use App\Models\ShopRepresentative;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -36,10 +38,11 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::createUsersUsing(CreateNewUser::class);
 
         Fortify::authenticateUsing(function (Request $request) {
+            $url = url()->current();
             $user = null;
-            if($request->is('admins/*')) {
+            if(preg_match("/admins/", $url)) {
                 $user = Administrator::where('email', $request->email)->first();
-            } else if($request->is('shops/*')) {
+            } else if(preg_match("/shops/", $url)) {
                 $user = ShopRepresentative::where('email', $request->email)->first();
             } else {
                 $user = User::where('email', $request->email)->first();

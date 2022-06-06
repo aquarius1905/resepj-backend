@@ -40,6 +40,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'administrators',
+        ],
+        'shop' => [
+            'driver' => 'session',
+            'provider' => 'shop_represetntatives',
+        ]
     ],
 
     /*
@@ -64,7 +72,14 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-
+        'administrators' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\Administrator::class
+        ],
+        'shop_represetntatives' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\ShopRepresentative::class
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
@@ -91,7 +106,19 @@ return [
             'provider' => 'users',
             'table' => 'password_resets',
             'expire' => 60,
-            'throttle' => 60,
+            'throttle' => 10000,
+        ],
+        'administrators' => [
+            'provider' => 'administrators',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 10000,
+        ],
+        'shop_represetntatives' => [
+            'provider' => 'shop_represetntatives',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 10000,
         ],
     ],
 

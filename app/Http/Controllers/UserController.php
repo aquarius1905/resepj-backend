@@ -40,12 +40,11 @@ class UserController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Laravel\Fortify\Contracts\CreatesNewUsers  $creator
-     * @return @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response
      */
     public function store(Request $request,
                           CreatesNewUsers $creator)
     {
-        Log::Debug($request);
         event(new Registered($user = $creator->create($request->all())));
         return response()->json([
             'message' => 'Store sucessfully!'

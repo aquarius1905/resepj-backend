@@ -10,13 +10,9 @@ use Laravel\Fortify\Actions\AttemptToAuthenticate;
 use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
-use Laravel\Fortify\Contracts\LoginViewResponse;
-use Laravel\Fortify\Contracts\LogoutResponse;
-use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Requests\LoginRequest;
 use App\Models\User;
-use Log;
 
 class UserAuthController extends Controller
 {
@@ -39,17 +35,6 @@ class UserAuthController extends Controller
     }
 
     /**
-     * Show the login view.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Laravel\Fortify\Contracts\LoginViewResponse
-     */
-    public function create(Request $request): LoginViewResponse
-    {
-        return app(LoginViewResponse::class);
-    }
-
-    /**
      * Attempt to authenticate a new session.
      *
      * @param  \Laravel\Fortify\Http\Requests\LoginRequest  $request
@@ -58,8 +43,7 @@ class UserAuthController extends Controller
     public function store(LoginRequest $request)
     {
         return $this->loginPipeline($request)->then(function ($request) {
-            $user = User::where('email', )->firstOrFail();
-            Log::Debug($user);
+            $user = User::where('email', $request->email)->firstOrFail();
             $token = $user->createToken('auth_user_token')->plainTextToken;
             return response()->json([
                 'access_token' => $token,
@@ -99,16 +83,15 @@ class UserAuthController extends Controller
      * Destroy an authenticated session.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Laravel\Fortify\Contracts\LogoutResponse
+     * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request): LogoutResponse
+    public function destroy(Request $request)
     {
         $this->guard->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
-        return app(LogoutResponse::class);
+        return response()->json([
+            'message' => "Logged out successfully"
+        ], 200);
     }
 }

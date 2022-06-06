@@ -32,10 +32,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/users', [UserController::class, 'store']);
 //ユーザー情報取得
 Route::get('/users/me', [UserController::class, 'show']);
-//ユーザーログイン
-Route::post('/users/login', [UserAuthController::class, 'store']);
-//ユーザーログアウト
-Route::post('/users/loguout', [UserAuthController::class, 'destroy']);
+
+Route::prefix('users')->group(function () {
+  // ユーザーログイン
+  Route::post('/login', [UserAuthController::class, 'store'])->name('user.login');
+  Route::middleware('auth:web')->group(function () {
+    // ユーザーログアウト
+    Route::post('/logout', [UserAuthController::class, 'destroy'])->name('user.logout');
+  });
+});
 
 // index：飲食店一覧取得
 // store: 飲食店情報登録
@@ -75,16 +80,16 @@ Route::apiResource('/payments', PaymentController::class)->only([
 Route::prefix('shops')->group(function () {
   // 店舗代表者ログイン
   Route::post('/login', [ShopAuthController::class, 'store'])->name('shop.login');
-  Route::middleware('auth:admin')->group(function () {
+  Route::middleware('auth:shop')->group(function () {
     // 店舗代表者ログアウト
     Route::post('/logout', [ShopAuthController::class, 'destroy'])->name('shop.logout');
   });
 });
 Route::prefix('admins')->group(function () {
   // 管理者ログイン
-  Route::post('/login', [AdminAuthController::class, 'store']);
+  Route::post('/login', [AdminAuthController::class, 'store'])->name('admin.login');
   Route::middleware('auth:admin')->group(function () {
     // 管理者ログアウト
-    Route::post('/logout', [AdminAuthController::class, 'destroy']);
+    Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('admin.logout');
   });
 });

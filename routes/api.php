@@ -64,6 +64,10 @@ Route::prefix('shop-represetatives')->group(function () {
   Route::apiResource('/', ShopRepresentativeController::class)->only([
     'store'
   ]);
+  Route::middleware('auth:shop')->group(function () {
+    // 店舗代表者取得
+    Route::get('/me', [ShopRepresentativeController::class, 'me']);
+    });
 });
 
 

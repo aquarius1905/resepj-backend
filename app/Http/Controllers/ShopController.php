@@ -11,7 +11,6 @@ use App\Models\Shop;
 use App\Models\Area;
 use App\Models\Genre;
 use App\Models\Course;
-use Log;
 
 class ShopController extends Controller
 {
@@ -22,7 +21,6 @@ class ShopController extends Controller
      */
     public function index()
     {
-        Log::Debug("ShopController::index");
         $user_id = Auth::id();
         $items = Shop::with(['area', 'genre', 'likes' => function($query) use($user_id) {
         $query->where('user_id', $user_id);
@@ -48,7 +46,6 @@ class ShopController extends Controller
      */
     public function store(ShopRegisterRequest $request)
     {
-        Log::Debug("ShopController::store");
         //店舗の追加
         $shop_inputs = $request->except(['_token', 'course_names', 'course_prices']);
         $course_arrays = $request->only(['course_names', 'course_prices']);
@@ -90,7 +87,6 @@ class ShopController extends Controller
      */
     public function show($id)
     {
-        Log::Debug("ShopController::show");
         $item = Shop::with(['courses'])->find($id);
         if($item) {
             $payment_flg = false;
@@ -156,7 +152,6 @@ class ShopController extends Controller
      */
     public function search(Request $request)
     {
-        Log::Debug("ShopController::search");
         $area = $request->area;
         $genre = $request->genre;
         $shop_name = $request->shop_name;

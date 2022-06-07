@@ -30,7 +30,7 @@ class UserController extends Controller
         event(new Registered($user = $creator->create($request->all())));
         return response()->json([
             'message' => 'Store sucessfully!'
-            ], 201);
+        ], 201);
     }
 
     /**

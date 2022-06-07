@@ -18,7 +18,7 @@ class ReservationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ReservationRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(ReservationRequest $request)
@@ -50,7 +50,7 @@ class ReservationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ReservationRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */

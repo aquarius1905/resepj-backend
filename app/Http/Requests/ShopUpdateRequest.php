@@ -28,6 +28,8 @@ class ShopUpdateRequest extends FormRequest
             'area_id' => 'required',
             'genre_id' => 'required',
             'overview' => 'required|max:255',
+            'course_names.*' => 'required|max:255',
+            'course_prices.*' => 'required|regex:/^[1-9][0-9]+$/i'
         ];
     }
 
@@ -36,6 +38,7 @@ class ShopUpdateRequest extends FormRequest
         return [
             'required' => ':attributeは入力必須です',
             'max' => ':attributeは255文字以内で入力してください',
+            'regex' => ':attributeには半角数字、かつ正しい入力形式を指定してください'
         ];
     }
 
@@ -46,6 +49,8 @@ class ShopUpdateRequest extends FormRequest
             'area_id' => 'エリア',
             'genre_id' => 'ジャンル',
             'overview' => '概要',
+            'course_names.*' => 'コース名',
+            'course_prices.*' => '金額'
         ];
     }
 }

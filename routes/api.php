@@ -24,42 +24,32 @@ use App\Http\Controllers\Auth\UserAuthController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
-//ユーザー登録
-Route::post('/users', [UserController::class, 'store']);
-//ユーザー情報取得
-Route::get('/users/me', [UserController::class, 'show']);
 
 Route::prefix('users')->group(function () {
+  //ユーザー登録
+  Route::post('/', [UserController::class, 'store']);
   // ユーザーログイン
   Route::post('/login', [UserAuthController::class, 'store'])->name('user.login');
   Route::middleware('auth:web')->group(function () {
+    //ユーザー情報取得
+    Route::get('/me', [UserController::class, 'me']);
     // ユーザーログアウト
     Route::post('/logout', [UserAuthController::class, 'destroy'])->name('user.logout');
   });
 });
 
-// index：飲食店一覧取得
-// store: 飲食店情報登録
-// show: 飲食店詳細取得
-// update: 飲食店情報更新
-Route::apiResource('/shops', ShopController::class)->only(
-  ['index', 'store', 'show', 'update']
-);
-
-// search: 飲食店検索
-Route::get('/shops/search', [ShopController::class, 'search'])->name('shops.search');
-
 // store: お気に入り登録
 // delete: お気に入り削除
-Route::middleware('auth:sanctum')->apiResource('/likes', LikeController::class)->only([
+Route::middleware('auth:web')->apiResource('/likes', LikeController::class)->only([
   'store', 'destroy'
 ]);
-// show: 評価取得
-// store: 評価登録
+// store: 予約登録
+// update: 予約更新
+// update: 予約削除
 Route::apiResource('/reservations', ReservationController::class)->only([
   'store', 'update', 'delete'
 ]);
@@ -69,15 +59,28 @@ Route::apiResource('/reservations/{reservation}/ratings', RatingController::clas
   'show', 'store'
 ]);
 
-// store: 店舗代表者登録
-Route::apiResource('/shop-represetatives', ShopRepresentativeController::class)->only([
-  'store'
-]);
+Route::prefix('shop-represetatives')->group(function () {
+  // store: 店舗代表者登録
+  Route::apiResource('/', ShopRepresentativeController::class)->only([
+    'store'
+  ]);
+});
+
+
 // カード決済
 Route::apiResource('/payments', PaymentController::class)->only([
   'store'
 ]);
-Route::prefix('shops')->group(function () {
+  // index：飲食店一覧取得
+  // show: 飲食店詳細取得
+  // store：飲食店情報登録
+  // update: 飲食店情報更新
+  Route::apiResource('/shops', ShopController::class)->only([
+    'index', 'show', 'store', 'update'
+  ]);
+Route::prefix('/shops')->group(function () {
+  // search: 飲食店検索
+  Route::get('search', [ShopController::class, 'search'])->name('shops.search');
   // 店舗代表者ログイン
   Route::post('/login', [ShopAuthController::class, 'store'])->name('shop.login');
   Route::middleware('auth:shop')->group(function () {

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Rating;
 use App\Models\Reservation;
-use Illuminate\Http\Request;
 use App\Http\Requests\RatingRequest;
 
 class RatingController extends Controller

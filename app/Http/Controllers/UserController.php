@@ -18,24 +18,6 @@ use Log;
 class UserController extends Controller
 {
     /**
-     * The guard implementation.
-     *
-     * @var \Illuminate\Contracts\Auth\StatefulGuard
-     */
-    protected $guard;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @param  \Illuminate\Contracts\Auth\StatefulGuard  $guard
-     * @return void
-     */
-    public function __construct(StatefulGuard $guard)
-    {
-        $this->guard = $guard;
-    }
-
-    /**
      * Create a new registered user.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -52,13 +34,13 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get the authenticated User information.
      *
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function me()
     {
+        Log::Debug($id);
         $user = Auth::user();
         $today = new DateTime();
         $today = $today->format('Y-m-d');

@@ -11,6 +11,7 @@ use App\Models\Shop;
 use App\Models\Area;
 use App\Models\Genre;
 use App\Models\Course;
+use Log;
 
 class ShopController extends Controller
 {
@@ -21,6 +22,7 @@ class ShopController extends Controller
      */
     public function index()
     {
+        Log::Debug("ShopController::index");
         $user_id = Auth::id();
         $items = Shop::with(['area', 'genre', 'likes' => function($query) use($user_id) {
         $query->where('user_id', $user_id);
@@ -41,14 +43,15 @@ class ShopController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  App\Http\Requests\ShopRegisterRequest  $request
+     * @param  \App\Http\Requests\ShopRegisterRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(ShopRegisterRequest $request)
     {
+        Log::Debug("ShopController::store");
         //店舗の追加
         $shop_inputs = $request->except(['_token', 'course_names', 'course_prices']);
-        $course = $request->only(['course_names', 'course_prices']);
+        $course_arrays = $request->only(['course_names', 'course_prices']);
         $img = $request->file('img');
         if(app()->isLocal() || app()->runningUnitTests())
         {
@@ -61,30 +64,37 @@ class ShopController extends Controller
             $shop_inputs['img_filename'] = $path;
         }
         $shop = Shop::create($shop_inputs);
-        //コースの追加
         $course_inputs = [];
-        foreach(array_map(NULL, $course['course_names'], $course['course_prices']) as [$name, $price]) {
+        foreach(array_map(NULL, $course_arrays['course_names'], $course_arrays['course_prices']) as [$name, $price]) {
             array_push($course_inputs, ['shop_id' => $shop->id, 'name'=> $name, 'price' => $price]);
         }
-        $course = Course::create($course_inputs);
-        return response()->json([
-            'shop' => $shop,
-            'course' => $course
-        ], 201);
+        $result = Course::insert($course_inputs);
+        if($shop && $result) {
+            $courses = Course::where('shop_id', $shop->id)->get()->toArray();
+            return response()->json([
+                'shop' => $shop,
+                'courses' => $courses
+            ], 201);
+        } else {
+            return response()->json([
+                'message' => 'Insert failed'
+            ], 404);
+        }
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Shop  $shop
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Shop $shop)
+    public function show($id)
     {
-        $item = Shop::with(['courses'])->find($shop->id);
+        Log::Debug("ShopController::show");
+        $item = Shop::with(['courses'])->find($id);
         if($item) {
             $payment_flg = false;
-            return reseponse()->json([
+            return response()->json([
                 'item' => $item,
                 'payment_flg' => $payment_flg
             ], 200);
@@ -98,29 +108,36 @@ class ShopController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  App\Http\Requests\ShopUpdateRequest  $request
-     * @param  \App\Models\Shop  $shop
+     * @param  \App\Http\Requests\ShopUpdateRequest  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(ShopUpdateRequest $request, Shop $shop)
+    public function update(ShopUpdateRequest $request, $id)
     {
-        $shop = null;
         $file = $request->file('img');
+        $result = false;
         if($file) {
-            $inputs = $request->except(['_token']);
+            $inputs = $request->only([
+                'name','area_id','genre_id','overview','img_filename'
+            ]);
             $path = $file->store('public');
             $inputs['img_filename'] = pathinfo($path, PATHINFO_BASENAME);
-            $shop = Shop::where('id', $shop->id)->update($inputs);
+            $result = Shop::where('id', $id)->update($inputs);
         } else {
-            $shop = Shop::where('id', $shop->id)
-            ->update([
-                'name' => $request->name,
-                'area_id' => $request->area_id,
-                'genre_id' => $request->genre_id,
-                'overview' => $request->overview
+            $inputs = $request->only([
+                'name','area_id','genre_id','overview'
+            ]);
+            $result = Shop::where('id', $id)->update($inputs);
+        }
+        //コースの更新
+        $course_ids = Course::where('shop_id', $id)->get(['id'])->toArray();
+        $course = $request->only(['course_names', 'course_prices']);
+        foreach(array_map(NULL, $course['course_names'], $course['course_prices'], $course_ids) as [$name, $price, $course_id]) {
+            $result = Course::where('id', $course_id['id'])->update([
+                'name'=> $name, 'price' => $price
             ]);
         }
-        if($shop) {
+        if($result) {
             return response()->json([
                 'message' => 'Update successfully'
             ], 200);
@@ -139,6 +156,7 @@ class ShopController extends Controller
      */
     public function search(Request $request)
     {
+        Log::Debug("ShopController::search");
         $area = $request->area;
         $genre = $request->genre;
         $shop_name = $request->shop_name;

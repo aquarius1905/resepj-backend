@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Laravel\Cashier\Payment;
 use Stripe\Stripe;
 use Stripe\Customer;
 use Stripe\Charge;
@@ -24,7 +23,7 @@ class PaymentController extends Controller
             'email' => $request->stripeEmail,
             'source' => $request->stripeToken
         ]);
-        $charge = Charge::create([
+        Charge::create([
             'customer' => $customer->id,
             'amount' => $request->amount,
             'currency' => "jpy"
